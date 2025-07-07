@@ -1,4 +1,12 @@
-def somar(a, b):
-    x = a + b, y = a - b
-    z = x + y
-    return z, x
+def calcular(a, b):
+    if a > b:
+        x = a + b
+        return x
+        if b == 0:
+            z = 0
+            return z
+    else id a == b:
+        y = a - b
+        return y
+    else:
+        return a / b
