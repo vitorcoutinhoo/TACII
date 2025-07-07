@@ -4,17 +4,13 @@ import re
 
 def reader(path):
     """
-    Função que lê o arquivo de código e destaca as
-    palavras reservadas e operadores.
+    Função que lê o arquivo de código e retorna as linhas originais.
 
     param:
         path: Caminho do arquivo de código.
     return:
-        Código formatado e separado por linhas com destaque 
-        para palavras reservadas e operadores.
-        
+        Lista de linhas do código (sem remover espaços ou formatar).
     """
-    res = None
     with open(path, "r", encoding="utf-8") as file:
         codigo = file.read()
     res = codigo.replace(" ", "")
