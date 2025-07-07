@@ -1,5 +1,6 @@
 # pylint: disable = "C0114, C0116, W0621, W0719"
 
+import re
 
 def reader(path):
     """
@@ -19,12 +20,16 @@ def reader(path):
     res = codigo.replace(" ", "")
 
     # destaca as palavras reservadas
-    for symbol in ["def", "if", "else", "elif", "for", "while", "return"]:
+    for symbol in ["def", "if", "elif", "for", "while", "return"]:
         res = res.replace(symbol, f"{symbol} ")
 
     # destaca os operadores
-    for symbol in ["=", "<=", ">=", "==", "and", "or", "not", "is"]:
-        res = res.replace(symbol, f" {symbol} ")
+    symbols = r'''(<=|>=|==|!=|=|\+|-|\*|/|%|//|\*\*|<|>|and|or|not)'''
+    for symbol in re.findall(symbols, res):
+        if symbol not in ["and", "or", "not"]:
+            res = res.replace(symbol, f" {symbol} ")
+        else:
+            res = res.replace(symbol, f"{symbol} ")
 
     # Separa as linhas
     lines = []
