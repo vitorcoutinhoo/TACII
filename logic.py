@@ -1,71 +1,105 @@
-# pylint: disable = "C0114, C0116, W0621, W0719, W0702, W0102, W0123, R0914, R0912"
+# pylint: disable = "C0114, C0116, W0621, W0719, W0702, W0718, W0102, W0123, R0914, R0912"
 
 from reader import reader
 
 def get_values(code, test_args=[10, 5]):
     values = {}
     param_dict = {}
-    returns = []                     # <- NOVO: acumula cada return
+    returns = []
 
-    for line in code:
-        line = line.strip()
+    exec_stack = []  # pilha de blocos ativos: [{'indent': X, 'ativo': True/False}]
+    i = 0
 
-        # Ignorar blocos de controle e comentários
-        if line.startswith(("if", "for", "while", "else", "elif", "#")):
-            continue
+    while i < len(code):
+        linha = code[i]['linha']
+        indent = code[i]['indent']
+
+        # Fecha blocos que terminaram
+        while exec_stack and exec_stack[-1]['indent'] >= indent:
+            exec_stack.pop()
+
+        # Verifica se linha está em bloco ativo
+        bloco_ativo = all(b['ativo'] for b in exec_stack)
 
         # 1. Definição da função
-        if line.startswith("def "):
-            name_part = line[4:].split("(")
+        if linha.startswith("def "):
+            name_part = linha[4:].split("(")
             func_name = name_part[0]
             params = [p.strip() for p in name_part[1].split(")")[0].split(",") if p.strip()]
             values[func_name] = params
 
-            for i, p in enumerate(params):
-                val = str(test_args[i]) if i < len(test_args) else None
+            for idx, p in enumerate(params):
+                val = str(test_args[idx]) if idx < len(test_args) else None
                 values[p] = ['param']
                 if val is not None:
                     values[p].append(val)
-                    param_dict[p] = val  # salva valor como string
+                    param_dict[p] = val
+            i += 1
+            continue
 
-        # 2. Retorno – agora acumulamos
-        elif line.startswith("return"):
-            returned = line[len("return"):].strip()
-            entry = [returned]       # primeiro item: expressão textual
+        # 2. if / elif / else
+        if linha.startswith(("if ", "elif ", "else")):
+            tipo = linha.split()[0]
+            indent_bloco = indent
 
-            # tentar calcular o valor retornado
-            if returned in values and len(values[returned]) == 2:
-                entry.append(values[returned][1])
+            # só processa se estiver em bloco ativo
+            if not bloco_ativo:
+                i += 1
+                continue
+
+            if tipo == "else":
+                cond = "True"
             else:
-                expr_eval = returned
+                cond = linha.split(" ", 1)[1].rstrip(":")
                 for k, v in param_dict.items():
-                    expr_eval = expr_eval.replace(k, v)
-                try:
-                    entry.append(eval(expr_eval))
-                except Exception:
-                    pass            # mantém só a expressão se não der pra avaliar
+                    cond = cond.replace(k, v)
+            try:
+                resultado = eval(cond)
+            except:
+                resultado = False
 
-            returns.append(entry)    # guarda este return
+            # Marca se esse bloco é ativo ou não
+            exec_stack.append({'indent': indent_bloco, 'ativo': resultado})
+            i += 1
+            continue
 
-        # 3. Atribuições (suporta múltiplas separadas por vírgula)
-        elif "=" in line:
-            parts = line.split(",")
-            for part in parts:
-                if "=" in part:
-                    var, expr = map(str.strip, part.split("=", 1))
-                    expr_eval = expr
-                    for k, v in param_dict.items():
-                        expr_eval = expr_eval.replace(k, v)
-                    try:
-                        result = eval(expr_eval)
-                    except Exception:
-                        result = None
-                    values[var] = [expr, result]
-                    if result is not None:
-                        param_dict[var] = str(result)
+        # 3. Dentro de bloco ativo: atribuição
+        if bloco_ativo and "=" in linha and "==" not in linha:
+            var, expr = map(str.strip, linha.split("=", 1))
+            expr_eval = expr
+            for k, v in param_dict.items():
+                expr_eval = expr_eval.replace(k, v)
+            try:
+                res = eval(expr_eval)
+            except:
+                res = None
+            values[var] = [expr, res]
+            if res is not None:
+                param_dict[var] = str(res)
 
-    values["returns"] = returns      # <- guarda lista completa de returns
+        # 4. Dentro de bloco ativo: return
+        elif bloco_ativo and linha.startswith("return"):
+            retorno = linha[len("return"):].strip()
+            retorno_eval = retorno
+            for k, v in param_dict.items():
+                retorno_eval = retorno_eval.replace(k, v)
+            try:
+                res = eval(retorno_eval)
+            except:
+                res = None
+            returns.append([retorno, res, True])
+            values["returns"] = returns
+            return values  # <- função termina aqui
+
+        i += 1
+
+    # fallback (caso múltiplos returns)
+    for r in returns[:-1]:
+        r[2] = False
+
+    values["returns"] = returns
     return values
+
 
 
 def bd_values(data):
@@ -101,8 +135,20 @@ def bd_values(data):
 
     return result
 
+codigo = reader("code.txt")
 
-# Exemplo rápido
-if __name__ == "__main__":
-    codigo = reader("code.txt")      # seu arquivo de teste
-    print(bd_values(get_values(codigo)))
+
+print(get_values(codigo, [10, 5]))
+print(bd_values(get_values(codigo, [10, 5])))
+print("-------------------------------------------------------")
+print(get_values(codigo, [5, 0]))
+print(bd_values(get_values(codigo, [5, 0])))
+print("-------------------------------------------------------")
+print(get_values(codigo, [5, 5]))
+print(bd_values(get_values(codigo, [5, 5])))
+print("-------------------------------------------------------")
+print(get_values(codigo, [1, 2]))
+print(bd_values(get_values(codigo, [1, 2])))
+
+
+
