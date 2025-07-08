@@ -1,12 +1,12 @@
 def calcular(a, b):
     if a > b:
         x = a + b
-        return x
         if b == 0:
-            z = 0
+            z = (a * b) - 2
             return z
-    else id a == b:
+        return x
+    elif a == b:
         y = a - b
         return y
     else:
-        return a / b
+        return (a / b)
