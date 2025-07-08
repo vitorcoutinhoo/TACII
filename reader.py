@@ -11,8 +11,12 @@ def reader(path):
     return:
         Lista de linhas do código (sem remover espaços ou formatar).
     """
+    """
     with open(path, "r", encoding="utf-8") as file:
         codigo = file.read()
+    """
+
+    codigo = path
     
     # Substitui tabulações por 4 espaços (padrão)
     codigo = codigo.replace("\t", "    ")

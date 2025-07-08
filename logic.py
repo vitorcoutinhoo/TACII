@@ -135,10 +135,10 @@ def bd_values(data):
 
     return result
 
-codigo = reader("code.txt")
+#codigo = reader("code.txt")
 
 
-print(get_values(codigo, [10, 5]))
+"""print(get_values(codigo, [10, 5]))
 print(bd_values(get_values(codigo, [10, 5])))
 print("-------------------------------------------------------")
 print(get_values(codigo, [5, 0]))
@@ -148,7 +148,7 @@ print(get_values(codigo, [5, 5]))
 print(bd_values(get_values(codigo, [5, 5])))
 print("-------------------------------------------------------")
 print(get_values(codigo, [1, 2]))
-print(bd_values(get_values(codigo, [1, 2])))
+print(bd_values(get_values(codigo, [1, 2])))"""
 
 
 
