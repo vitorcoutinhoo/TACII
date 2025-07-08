@@ -1,4 +1,0 @@
-def somar(a, b):
-    x = a + b, y = a - b
-    z = x + y
-    return z, x
