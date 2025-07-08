@@ -13,22 +13,27 @@ def reader(path):
     """
     with open(path, "r", encoding="utf-8") as file:
         codigo = file.read()
-    res = codigo.replace(" ", "")
+    
+    # Substitui tabulações por 4 espaços (padrão)
+    codigo = codigo.replace("\t", "    ")
 
-    # destaca as palavras reservadas
-    for symbol in ["def", "if", "elif", "for", "while", "return"]:
-        res = res.replace(symbol, f"{symbol} ")
+    # 1. Adiciona espaço após palavras-chave (com borda de palavra)
+    for keyword in ["def", "if", "else", "elif", "for", "while", "return"]:
+        codigo = re.sub(rf'\b{keyword}\b', f"{keyword} ", codigo)
 
-    # destaca os operadores
-    symbols = r'''(<=|>=|==|!=|=|\+|-|\*|/|%|//|\*\*|<|>|and|or|not)'''
-    for symbol in re.findall(symbols, res):
-        if symbol not in ["and", "or", "not"]:
-            res = res.replace(symbol, f" {symbol} ")
-        else:
-            res = res.replace(symbol, f"{symbol} ")
+    # 2. Adiciona espaço em volta dos operadores
+    padrao_operadores = r'(<=|>=|==|!=|//|\*\*|<|>|=|\+|-|\*|/|%|\band\b|\bor\b|\bnot\b)'
+    codigo = re.sub(padrao_operadores, r' \1 ', codigo)
 
-    # Separa as linhas
-    lines = []
-    for line in res.split("\n"):
-        lines.append(line)
-    return lines
+    # 3. Quebra em linhas e limpa espaços duplicados por linha
+    linhas = []
+    for linha in codigo.splitlines():
+        indent = len(linha) - len(linha.lstrip(" "))
+        linha_limpa = re.sub(r'\s+', ' ', linha).strip()
+        if linha_limpa:  # ignora linhas totalmente vazias
+            linhas.append({
+                "linha": linha_limpa,
+                "indent": indent
+            })
+
+    return linhas
