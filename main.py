@@ -3,9 +3,9 @@
 import tkinter as tk
 from tkinter import Toplevel, messagebox
 
-from reader import reader
-from logic import get_values, bd_values, vvar
-from bd_conn import (
+from modules.reader import reader
+from modules.logic import get_values, bd_values, vvar
+from modules.bd_conn import (
     criar_tabela_analises,
     criar_tabela_comparacoes,
     salvar_bd_values_analises,
