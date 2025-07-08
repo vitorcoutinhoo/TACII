@@ -84,6 +84,7 @@ def generate_result():
 
     result1 = bd_values(get_values(t1, case_test))
     result2 = bd_values(get_values(t2, case_test))
+    
 
     salvar_bd_values_analises(result1)
     salvar_bd_values_analises(result2)
