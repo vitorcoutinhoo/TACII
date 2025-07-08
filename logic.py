@@ -1,6 +1,6 @@
 # pylint: disable = "C0114, C0116, W0621, W0719, W0702, W0718, W0102, W0123, R0914, R0912"
 
-from reader import reader
+import ast
 
 def get_values(code, test_args=[10, 5]):
     values = {}
@@ -135,20 +135,21 @@ def bd_values(data):
 
     return result
 
-#codigo = reader("code.txt")
+def vvar(tupla):
+    """
+    Aplica a fórmula V(Var) = soma de entradas + internas + saídas
+    Espera tupla no formato:
+    (id, qtd_entrada, '["val1", "val2"]', qtd_internas, '[val]', qtd_saida, '[val]')
+    """
 
+    def str_para_lista_floats(texto):
+        texto = texto.strip().replace('[', '').replace(']', '')
+        if not texto:
+            return []
+        return [float(x.strip().replace('"', '').replace("'", '')) for x in texto.split(',') if x.strip()]
 
-"""print(get_values(codigo, [10, 5]))
-print(bd_values(get_values(codigo, [10, 5])))
-print("-------------------------------------------------------")
-print(get_values(codigo, [5, 0]))
-print(bd_values(get_values(codigo, [5, 0])))
-print("-------------------------------------------------------")
-print(get_values(codigo, [5, 5]))
-print(bd_values(get_values(codigo, [5, 5])))
-print("-------------------------------------------------------")
-print(get_values(codigo, [1, 2]))
-print(bd_values(get_values(codigo, [1, 2])))"""
+    entradas = str_para_lista_floats(tupla[2])
+    internas = str_para_lista_floats(tupla[4])
+    retornos = str_para_lista_floats(tupla[6])
 
-
-
+    return sum(entradas) + sum(internas) + sum(retornos)
